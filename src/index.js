@@ -1,48 +1,130 @@
-import axios from "axios";
-// import { fetchBreeds, fetchCatByBreed } from './cat-api';
-import {fetchBreeds} from './cat-api.js'
 
-const API_KEY = "live_EqyjPWAaaLE4fiMxOePmQmkkrhxFcAwHsESZrQCBupk7XHE4FReYt4krSTy8oVf1"
-//  axios.defaults.headers.common['x-api-key'] = API_KEY;
- 
-function populateBreedSelect() {
-    axios.defaults.headers.common['x-api-key'] = API_KEY;
-  return fetchBreeds(`${API_KEY}`)
-    .then(breeds => {
-    
-      const selectElement = document.querySelector('.breed-select');
+import { fetchBreeds, fetchCatByBreed } from './cat-api.js';
+import SlimSelect from 'slim-select';
 
-     
-      breeds.forEach(breed => {
-        const optionElement = document.createElement('option');
-        optionElement.value = breed.id;
-        optionElement.textContent = breed.name;
-        selectElement.appendChild(optionElement);
-        console.dir(optionElement.value);
-      });
-    })
-    .catch(error => {
-      console.error(error.message);
-    });
+new SlimSelect({
+  select: '.breed-select',
+});
+
+const refs = {
+  selectEl: document.querySelector('.breed-select'),
+  catInfoElem: document.querySelector('.cat-info'),
+  loaderElem: document.querySelector('.loader'),
+  errorElem: document.querySelector('.error')
+};
+
+
+
+fetchBreeds()
+  .then(res => {
+    renderMarkup(res.data);
+    refs.loaderElem.classList.add('is-hidden');
+  })
+  .catch((error)=>{refs.errorElem.classList.remove('is-hidden');console.log(error)})
+  .finally(()=> refs.loaderElem.classList.add('is-hidden'));
+
+
+function createMarkup(array){
+  const markup = array.map(({id, name})=>{
+  return `<option value="${id}">${name}</option>`;
+  }).join("")
+  return markup;
 }
 
 
-populateBreedSelect();
+function renderMarkup(array){
+  const markup = createMarkup(array)
+  refs.selectEl.innerHTML = markup;
+}
+
+
+
+refs.selectEl.addEventListener('change', onSelectChange)
+
+function onSelectChange(evt){
+const userValue = evt.currentTarget.value;
+  refs.loaderElem.classList.remove('is-hidden');
+  refs.errorElem.classList.add('is-hidden');
+fetchCatByBreed(userValue)
+  .then(res => {
+    renderCatMarkup(res.data[0]);
+  })
+  .catch(() => {refs.errorElem.classList.remove('is-hidden');console.log(error);})
+  .finally(() => refs.loaderElem.classList.add('is-hidden'));
+
+}
+
+
+function createCatMarkup(data) {
+  const catInfo = data.breeds[0]
+  const { name, description, temperament } = catInfo;
+  console.log(catInfo);
+  return `<img src="${data.url}" alt="${name}" class = "cat__img"><h2 class = "cat__name">${name}</h2><p class = "cat__description">${description}</p><p clas = cat__temperament>${temperament}</p>`;
+}
+
+function renderCatMarkup(data){
+ const markup = createCatMarkup(data)
+ refs.catInfoElem.innerHTML = markup;
+ 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 // function populateBreedSelect() {
-    
-//   fetchBreeds()
+//     axios.defaults.headers.common['x-api-key'] = API_KEY;
+//   return fetchBreeds(`${API_KEY}`)
 //     .then(breeds => {
+    
 //       const selectElement = document.querySelector('.breed-select');
 
+     
 //       breeds.forEach(breed => {
 //         const optionElement = document.createElement('option');
 //         optionElement.value = breed.id;
 //         optionElement.textContent = breed.name;
 //         selectElement.appendChild(optionElement);
+//         console.dir(optionElement.value);
 //       });
 //     })
 //     .catch(error => {
@@ -50,25 +132,11 @@ populateBreedSelect();
 //     });
 // }
 
+
 // populateBreedSelect();
 
-// document.querySelector('.breed-select').addEventListener('change', event => {
-//   const breedId = event.target.value;
 
-//   fetchCatByBreed(breedId)
-//     .then(catInfo => {
-//       const catInfoElement = document.querySelector('.cat-info');
-//       catInfoElement.innerHTML = `
-//         <h2>${catInfo.breeds[0].name}</h2>
-//         <p>Description:${catInfo.breeds[0].description}</p>
-//         <p>Temperament:${catInfo.breeds[0].temperament}</p>
-//         <img src="${catInfo.url}" alt="${catInfo.breeds[0].name}" />
-//       `;
-//     })
-//     .catch(error => {
-//       console.error(error.message);
-//     });
-// });
+
 
 
 
