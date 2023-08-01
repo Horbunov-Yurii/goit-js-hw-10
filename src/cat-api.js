@@ -6,10 +6,8 @@ export function fetchBreeds() {
         throw new Error(console.log(Error));
       }
       return response.json();
-    })
-    .catch(error => {
-      throw new Error(console.log(Error));
     });
+   
 }
 
 
