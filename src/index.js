@@ -2,10 +2,9 @@
 import { fetchBreeds, fetchCatByBreed } from './cat-api.js';
 import SlimSelect from 'slim-select';
 import Notiflix from 'notiflix';
+import '/node_modules/slim-select/dist/slimselect.css';
 
-new SlimSelect({
-  select: '.breed-select',
-});
+
 
 const refs = {
   selectEl: document.querySelector('.breed-select'),
@@ -19,6 +18,9 @@ const refs = {
 fetchBreeds()
   .then(res => {
     renderMarkup(res.data);
+    new SlimSelect({
+      select: '.breed-select',
+    });
     refs.loaderElem.classList.add('is-hidden');
   })
   .catch((error)=>{refs.errorElem.classList.remove('is-hidden');console.log(error)})
