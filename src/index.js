@@ -9,8 +9,9 @@ import '/node_modules/slim-select/dist/slimselect.css';
 const refs = {
   selectEl: document.querySelector('.breed-select'),
   catInfoElem: document.querySelector('.cat-info'),
-  loaderElem: document.querySelector('.loader'),
-  errorElem: document.querySelector('.error')
+  loaderElem: document.querySelector('.load'),
+  errorElem: document.querySelector('.error'),
+  load: document.querySelector('.loader')
 };
 
 
@@ -21,10 +22,13 @@ fetchBreeds()
     new SlimSelect({
       select: '.breed-select',
     });
-    refs.loaderElem.classList.add('is-hidden');
+    refs.selectEl.classList.remove('is-hidden');
   })
-  .catch((error)=>{refs.errorElem.classList.remove('is-hidden');console.log(error)})
-  .finally(()=> refs.loaderElem.classList.add('is-hidden'));
+  .catch(error => {
+    Notiflix.Notify.failure('Oops! Something went wrong! Try reloading the page!');
+    refs.errorElem.classList.remove('is-hidden');
+  })
+  .finally(() => refs.load.classList.add('is-hidden'));
 
 
 function createMarkup(array){
@@ -46,14 +50,29 @@ refs.selectEl.addEventListener('change', onSelectChange)
 
 function onSelectChange(evt){
 const userValue = evt.currentTarget.value;
+
+  refs.load.classList.remove('is-hidden');
   refs.loaderElem.classList.remove('is-hidden');
   refs.errorElem.classList.add('is-hidden');
+ refs.catInfoElem.innerHTML = '';
+ 
+
 fetchCatByBreed(userValue)
   .then(res => {
+   
     renderCatMarkup(res.data[0]);
   })
-  .catch(() => {refs.errorElem.classList.remove('is-hidden');console.log(error);})
-  .finally(() => refs.loaderElem.classList.add('is-hidden'));
+  .catch(() => {
+    Notiflix.Notify.failure(
+      'Oops! Something went wrong! Try reloading the page!'
+    );
+    refs.errorElem.classList.remove('is-hidden');
+    console.log(error)})
+  .finally(() => {
+    refs.loaderElem.classList.add('is-hidden');
+    refs.load.classList.add('is-hidden');
+  });
+
 
 }
 
